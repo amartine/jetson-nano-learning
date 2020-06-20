@@ -39,15 +39,22 @@ def frameReader(camera, cameraName):
     else:
         ret = False
     while ret:
+        
+        #Creating a low-pass filter:
+
+        dt = 1/21                       #time interval
+        RC = 0.0005                     #time constant
+        alpha = round((dt)/((dt) + RC ),2)       #smoothing factor--- The selected values of the LP Filter Stabilizes FPS reads after 30-40 sec 
+
         ret, frame= camera.read()
         if cameraName == '0':
             t = time.time() - startTimeCam1
-            elapsedTimeAverage1 = .9*elapsedTimeAverage1 + .1*t   
-            FPS = str(round(1/elapsedTimeAverage1,1))
+            elapsedTimeAverage1 = alpha*elapsedTimeAverage1 + (1-alpha)*t 
+            FPS = str(round(1/elapsedTimeAverage1 + .01,1))
         if cameraName == '1':
             t = time.time() - startTimeCam2
-            elapsedTimeAverage2 = .9*elapsedTimeAverage2 + .1*t   
-            FPS = str(round(1/elapsedTimeAverage2,1))
+            elapsedTimeAverage2 = alpha*elapsedTimeAverage2 + (1-alpha)*t   
+            FPS = str(round(1/elapsedTimeAverage2 + .01,1))
 
         cv2.rectangle(frame,(0,0),(130,40),(0,0,255),-1)
         cv2.putText(frame, FPS + ' fps',(3,28), font,0.75,(66,174,255),2)
